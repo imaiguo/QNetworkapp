@@ -52,7 +52,7 @@ bool DownloadManager::saveToDisk(const QString &filename, QIODevice *data)
 
     file.write(data->readAll());
     file.close();
-
+    qDebug()<<"["<<filename<<"] saved in currernt path;";
     return true;
 }
 
@@ -66,6 +66,11 @@ bool DownloadManager::isHttpRedirect(QNetworkReply *reply)
 void DownloadManager::execute()
 {
     QStringList args = QCoreApplication::instance()->arguments();
+
+    // for test
+    args.append("https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png");
+    args.append("http://www.zzbaike.com/w/images/c/cc/Http_img.jpg");
+
     args.takeFirst();           // skip the first argument, which is the program's name
     if (args.isEmpty()) {
         printf("Qt Download example - downloads all URLs in parallel\n"
