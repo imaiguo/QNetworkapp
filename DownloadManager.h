@@ -23,9 +23,13 @@ public:
     static QString saveFileName(const QUrl &url);
     bool saveToDisk(const QString &filename, QIODevice *data);
     static bool isHttpRedirect(QNetworkReply *reply);
+    static void setPath(const QString dir);
+    static const QString getPath();
 
 public slots:
-    void execute();
     void downloadFinished(QNetworkReply *reply);
     void sslErrors(const QList<QSslError> &errors);
+
+public:
+    static QString m_path;
 };

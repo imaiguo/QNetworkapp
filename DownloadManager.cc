@@ -1,9 +1,19 @@
 #include "DownloadManager.h"
 
+QString DownloadManager::m_path;
+
 DownloadManager::DownloadManager()
 {
     connect(&manager, SIGNAL(finished(QNetworkReply*)),
             SLOT(downloadFinished(QNetworkReply*)));
+}
+
+void DownloadManager::setPath(const QString dir){
+    m_path = dir;
+}
+
+const QString DownloadManager::getPath(){
+    return m_path;
 }
 
 void DownloadManager::doDownload(const QUrl &url)
@@ -27,6 +37,14 @@ QString DownloadManager::saveFileName(const QUrl &url)
     if (basename.isEmpty())
         basename = "download";
 
+    if(getPath().isEmpty()){
+        setPath(QDir::currentPath());
+        qDebug()<<"file save path is ["<<getPath()<<"].";
+    }
+
+    basename = getPath() + "/" + basename;
+
+/*
     if (QFile::exists(basename)) {
         // already exists, don't overwrite
         int i = 0;
@@ -36,7 +54,7 @@ QString DownloadManager::saveFileName(const QUrl &url)
 
         basename += QString::number(i);
     }
-
+*/
     return basename;
 }
 
@@ -52,7 +70,7 @@ bool DownloadManager::saveToDisk(const QString &filename, QIODevice *data)
 
     file.write(data->readAll());
     file.close();
-    qDebug()<<"["<<filename<<"] saved in currernt path;";
+    // qDebug()<<"["<<filename<<"] saved in currernt path;";
     return true;
 }
 
@@ -63,31 +81,6 @@ bool DownloadManager::isHttpRedirect(QNetworkReply *reply)
            || statusCode == 305 || statusCode == 307 || statusCode == 308;
 }
 
-void DownloadManager::execute()
-{
-    QStringList args = QCoreApplication::instance()->arguments();
-
-    // for test
-    args.append("https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png");
-    args.append("http://www.zzbaike.com/w/images/c/cc/Http_img.jpg");
-
-    args.takeFirst();           // skip the first argument, which is the program's name
-    if (args.isEmpty()) {
-        printf("Qt Download example - downloads all URLs in parallel\n"
-               "Usage: download url1 [url2... urlN]\n"
-               "\n"
-               "Downloads the URLs passed in the command-line to the local directory\n"
-               "If the target file already exists, a .0, .1, .2, etc. is appended to\n"
-               "differentiate.\n");
-        QCoreApplication::instance()->quit();
-        return;
-    }
-
-    for (const QString &arg : qAsConst(args)) {
-        QUrl url = QUrl::fromEncoded(arg.toLocal8Bit());
-        doDownload(url);
-    }
-}
 
 void DownloadManager::sslErrors(const QList<QSslError> &sslErrors)
 {
